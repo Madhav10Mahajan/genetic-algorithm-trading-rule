@@ -80,6 +80,41 @@ def plot_worked_example(days, curves, in_cash, path):
     plt.close(fig)
 
 
+def plot_worked_example_risk(days, strategies, path):
+    """Toy example, risk side: drawdown day by day (left) and each strategy's daily Sharpe (right).
+
+    strategies: {label: (drawdown values per day, daily Sharpe, color)}.
+    """
+    fig, (left, right) = plt.subplots(1, 2, figsize=(12, 4.3), gridspec_kw={"width_ratios": [1.5, 1]})
+    for label, (dd, _, color) in strategies.items():
+        pct = np.asarray(dd) * 100
+        left.plot(days, pct, color=color, marker="o", markersize=4, label=f"{label}  (worst {min(dd):.2%})")
+        worst = int(np.argmin(pct))
+        left.annotate(f"{pct[worst]:.2f}%", (days[worst], pct[worst]), xytext=(6, -12),
+                      textcoords="offset points", fontsize=8.5, color=TEXT)
+    left.axhline(0, color=TEXT_2, linewidth=0.8)
+    left.set(title="Drawdown: % below the previous peak", xlabel="Day", ylabel="% below peak",
+             xticks=days, xlim=(days[0] - 0.5, days[-1] + 0.5))
+    lowest = min(min(dd) for dd, _, _ in strategies.values()) * 100
+    left.set_ylim(lowest * 1.5, 0.5)   # empty band below the lowest point holds the legend
+    left.legend(loc="lower left", fontsize=8.5)
+
+    right.set_axisbelow(True)   # gridlines behind the bars
+    labels = list(strategies)
+    sharpes = [s for _, s, _ in strategies.values()]
+    y = np.arange(len(labels))[::-1]
+    right.barh(y, sharpes, height=0.5, color=[c for _, _, c in strategies.values()])
+    for yi, s in zip(y, sharpes):
+        right.text(s + 0.005, yi, f"{s:.3f}", va="center", fontsize=9.5, color=TEXT)
+    right.set_yticks(y, labels)
+    right.set(title="Daily Sharpe: return per unit of risk", xlabel="Daily Sharpe",
+              xlim=(0, max(sharpes) * 1.2))
+    right.grid(axis="y", visible=False)
+    fig.tight_layout()
+    fig.savefig(path)
+    plt.close(fig)
+
+
 def plot_drawdowns(strategies, periods, path):
     """Underwater chart: % below the running peak, day by day - one row per strategy, one column per period.
 

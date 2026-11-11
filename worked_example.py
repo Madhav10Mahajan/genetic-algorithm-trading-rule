@@ -2,8 +2,9 @@
 The guide's worked example (README section 4), run through the real backtester.
 
 15 made-up prices, windows of 2-6 days, no transaction costs. Prints the numbers worked out
-by hand and draws results/0_worked_example.png - $100 under buy-and-hold, the GA's pick (1, 4)
-and random search's pick (1, 6), shaded on the days the GA's pick sat in cash.
+by hand and draws two charts comparing buy-and-hold, the GA's pick (1, 4) and random search's pick (1, 6):
+  results/0_worked_example.png       $100 over the 15 days, shaded on the days the GA's pick sat in cash
+  results/0_worked_example_risk.png  drawdown day by day, and each strategy's daily Sharpe
 
     python3 worked_example.py
 """
@@ -13,7 +14,7 @@ import numpy as np
 import pandas as pd
 
 import charts
-from backtest import Backtester, equity_curve, summarize
+from backtest import Backtester, drawdowns, equity_curve, summarize
 
 PRICES = [100, 102, 101, 104, 106, 105, 103, 100, 98, 99, 102, 105, 107, 106, 109]
 GA_PICK, RS_PICK = (1, 4), (1, 6)   # best pairs found by hand in sections 4.4-4.5
@@ -42,7 +43,12 @@ def main():
     charts.plot_worked_example(days, {name: (equity_curve(r.to_numpy()), color)   # day 1 = $100 start
                                       for name, (r, color) in strategies.items()},
                                in_cash=bt.positions(*GA_PICK) == 0, path=RESULTS / "0_worked_example.png")
-    print(f"\nChart written to {RESULTS / '0_worked_example.png'}")
+    # day 1 is the $100 start, which is its own peak -> drawdown 0
+    charts.plot_worked_example_risk(days, {name: (np.concatenate([[0.0], drawdowns(r.to_numpy())]),
+                                                  table.loc[name, "Sharpe"], color)
+                                           for name, (r, color) in strategies.items()},
+                                    path=RESULTS / "0_worked_example_risk.png")
+    print(f"\nCharts written to {RESULTS}/0_worked_example.png and 0_worked_example_risk.png")
 
 
 if __name__ == "__main__":

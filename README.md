@@ -196,6 +196,10 @@ The best Sharpe jumped from 0.202 to **0.288, the best possible pair**. It happe
 
 The grey bands mark days when the GA's pick held cash. On days 8–11 it sat out the fall to $98 that buy-and-hold went through.
 
+![worked example drawdown and Sharpe](results/0_worked_example_risk.png)
+
+The left panel shows how far below its previous peak each strategy was on each day. Buy-and-hold fell 7.55% from day 5 to day 9. The GA's pick stopped at −2.83%, and random search's pick at −1.90%, because both were in cash by day 8. The right panel shows the three Sharpe ratios side by side: they're close, with buy-and-hold slightly ahead.
+
 Buy-and-hold made the most money, because the market rose overall and the strategies missed some gains while in cash. The strategies were much less painful to hold, though, because they stepped aside during the fall. No strategy wins on every measure, which is why both Sharpe and drawdown are checked.
 
 ## 5. Results
@@ -254,8 +258,8 @@ Sharpe ratios are annualised with a 0% risk-free rate; the full table is in `res
 | Genetic algorithm | `ga.py` | Tournament selection, crossover, mutation, elitism, repair |
 | Random search | `random_search.py` | 1,500 random pairs, best kept |
 | Experiment | `main.py` | Search on training data → freeze → score once on test → overfitting diagnostics → charts |
-| Charts | `charts.py` | The six PNGs above |
-| Worked example | `worked_example.py` | Runs section 4 through the real backtester, prints its tables and draws its chart |
+| Charts | `charts.py` | The seven PNGs above |
+| Worked example | `worked_example.py` | Runs section 4 through the real backtester, prints its tables and draws its two charts |
 | Tests | `tests/test_worked_example.py` | Reproduces every number in section 4 |
 
 ```bash
