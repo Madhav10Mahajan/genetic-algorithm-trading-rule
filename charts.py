@@ -2,6 +2,7 @@
 import matplotlib
 
 matplotlib.use("Agg")
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
@@ -54,6 +55,36 @@ def plot_equity(curves, ga_cash_days, path, title):
     ax.set(title=title, ylabel="Value of $100", ylim=(min(c.min() for c, _ in curves.values()) * 0.95, top),
            xlim=(any_curve.index[0], any_curve.index[-1]))
     ax.legend(loc="upper left")
+    fig.tight_layout()
+    fig.savefig(path)
+    plt.close(fig)
+
+
+def plot_drawdowns(strategies, periods, path):
+    """Underwater chart: % below the running peak, day by day - one row per strategy, one column per period.
+
+    strategies: {label: (color, [drawdown Series for each period])}; periods: column titles.
+    All panels share one y-scale so the depths compare directly.
+    """
+    widths = [len(s) for s in next(iter(strategies.values()))[1]]   # columns as wide as their number of days
+    fig, axes = plt.subplots(len(strategies), len(periods), figsize=(13, 2.3 * len(strategies) + 0.6),
+                             sharey=True, sharex="col", squeeze=False, gridspec_kw={"width_ratios": widths})
+    for row, (label, (color, series)) in zip(axes, strategies.items()):
+        for ax, dd in zip(row, series):
+            pct = dd.to_numpy() * 100
+            ax.fill_between(dd.index, pct, 0, color=color, alpha=0.18, linewidth=0)
+            ax.plot(dd.index, pct, color=color, linewidth=1.1)
+            worst = dd.idxmin()
+            ax.scatter([worst], [dd.min() * 100], s=36, color=color, edgecolors=SURFACE, linewidths=1.2, zorder=3)
+            ax.annotate(f"{dd.min():.1%}  ({worst:%b %Y})", (worst, dd.min() * 100), xytext=(8, 2),
+                        textcoords="offset points", fontsize=8.5, color=TEXT, va="bottom")
+            ax.axhline(0, color=TEXT_2, linewidth=0.8)
+            ax.set_xlim(dd.index[0], dd.index[-1])
+            ax.xaxis.set_major_locator(mdates.YearLocator())
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+        row[0].set_ylabel(f"{label}\n% below peak", fontsize=9)
+    for ax, title in zip(axes[0], periods):
+        ax.set_title(title)
     fig.tight_layout()
     fig.savefig(path)
     plt.close(fig)

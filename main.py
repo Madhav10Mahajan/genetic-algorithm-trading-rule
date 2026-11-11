@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 
 import charts
-from backtest import Backtester, equity_curve, summarize
+from backtest import Backtester, drawdowns, equity_curve, summarize
 from config import (FAST_RANGE, MAX_DRAWDOWN_LIMIT, N_RUNS, SEED, SLOW_RANGE, TEST_END, TEST_START,
                     TRAIN_END, TRAIN_START)
 from data import load_prices
@@ -112,6 +112,11 @@ def main():
                             bh_point=(bh_train, bh_test), ga_generations=ga_generations, bh_test=bh_test,
                             path=RESULTS / "3_overfitting.png")
     charts.plot_sharpe_maps(grid_train, grid_test, ga_pick, RESULTS / "4_sharpe_maps.png")
+    charts.plot_drawdowns(
+        {name: (color, [pd.Series(drawdowns(r), index=r.index) for r in period_returns])
+         for (name, period_returns), color in zip(returns.items(), (charts.BH_COLOR, charts.GA_COLOR, charts.RS_COLOR))},
+        [f"Drawdown - training {TRAIN_START[:4]}-{TRAIN_END[:4]}", f"Drawdown - test {TEST_START[:4]}-{TEST_END[:4]}"],
+        RESULTS / "5_drawdowns.png")
     print(f"\n[Step 12] tables and charts written to {RESULTS}/")
 
 

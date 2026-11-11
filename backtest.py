@@ -44,9 +44,14 @@ def equity_curve(r, start=100.0):
     return start * np.concatenate([[1.0], np.cumprod(1 + np.asarray(r, dtype=float))])
 
 
-def max_drawdown(r):
+def drawdowns(r):
+    """Fall from the running peak on each day (0 at a new high); the starting $100 counts as a peak."""
     equity = equity_curve(r)
-    return (equity / np.maximum.accumulate(equity) - 1).min()
+    return (equity / np.maximum.accumulate(equity) - 1)[1:]
+
+
+def max_drawdown(r):
+    return drawdowns(r).min()
 
 
 def summarize(r, periods=TRADING_DAYS):
