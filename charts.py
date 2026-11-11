@@ -90,7 +90,7 @@ def plot_drawdowns(strategies, periods, path):
     plt.close(fig)
 
 
-def plot_overfitting(grid_train, grid_test, ga_points, rs_points, bh_point, ga_generations, bh_test, path):
+def plot_overfitting(grid_train, grid_test, ga_points, rs_points, bh_point, ga_generations, bh_test, seed, path):
     """Left: training vs test Sharpe for every pair. Right: GA's best pair per generation, train vs test."""
     fig, (left, right) = plt.subplots(1, 2, figsize=(13, 5.2))
 
@@ -118,7 +118,7 @@ def plot_overfitting(grid_train, grid_test, ga_points, rs_points, bh_point, ga_g
     right.axhline(bh_test, color=BH_COLOR, linewidth=1.2, label="Buy-and-hold test Sharpe")
     right.fill_between(gens, [g["test"] for g in ga_generations], [g["train"] for g in ga_generations],
                        color=GA_COLOR, alpha=0.08, linewidth=0)
-    right.set(title="GA's best pair each generation, seed 0\n(does test Sharpe follow training Sharpe up?)",
+    right.set(title=f"GA's best pair each generation, seed {seed}\n(does test Sharpe follow training Sharpe up?)",
               xlabel="Generation", ylabel="Sharpe (annualised)")
     right.legend(loc="lower right", fontsize=8.5)
 

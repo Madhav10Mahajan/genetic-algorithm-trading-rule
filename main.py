@@ -82,7 +82,7 @@ def main():
 
     ga_generations = [{"generation": h["generation"], "pair": h["best_pair"], "train": h["best_fitness"],
                        "test": bt.sharpe(h["best_pair"], *TEST)} for h in ga_runs[0].history]
-    pd.DataFrame(ga_generations).to_csv(RESULTS / "ga_generations_seed0.csv", index=False, float_format="%.4f")
+    pd.DataFrame(ga_generations).to_csv(RESULTS / f"ga_generations_seed{SEED}.csv", index=False, float_format="%.4f")
 
     print("\n=== [Step 11] OVERFITTING CHECK ===")
     print(runs.groupby("Method").agg(
@@ -109,7 +109,7 @@ def main():
                                                runs.query("Method == 'GA'")["Test Sharpe"])),
                             rs_points=list(zip(runs.query("Method != 'GA'")["Train Sharpe"],
                                                runs.query("Method != 'GA'")["Test Sharpe"])),
-                            bh_point=(bh_train, bh_test), ga_generations=ga_generations, bh_test=bh_test,
+                            bh_point=(bh_train, bh_test), ga_generations=ga_generations, bh_test=bh_test, seed=SEED,
                             path=RESULTS / "3_overfitting.png")
     charts.plot_sharpe_maps(grid_train, grid_test, ga_pick, RESULTS / "4_sharpe_maps.png")
     charts.plot_drawdowns(
