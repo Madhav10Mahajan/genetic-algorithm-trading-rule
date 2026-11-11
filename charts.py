@@ -15,7 +15,7 @@ SHARPE_CMAP = LinearSegmentedColormap.from_list("sharpe", ["#f4f8fd", "#b7d3f6",
 plt.rcParams.update({
     "figure.facecolor": SURFACE, "axes.facecolor": SURFACE, "savefig.facecolor": SURFACE,
     "axes.edgecolor": GRID, "axes.labelcolor": TEXT_2, "axes.titlecolor": TEXT, "axes.titlesize": 12,
-    "axes.titleweight": "semibold", "axes.titlelocation": "left", "axes.grid": True, "grid.color": GRID,
+    "axes.titleweight": "bold", "axes.titlelocation": "left", "axes.grid": True, "grid.color": GRID,
     "grid.linewidth": 0.8, "axes.spines.top": False, "axes.spines.right": False,
     "xtick.color": TEXT_2, "ytick.color": TEXT_2, "font.size": 10, "legend.frameon": False,
     "lines.linewidth": 2, "figure.dpi": 150,
@@ -54,6 +54,26 @@ def plot_equity(curves, ga_cash_days, path, title):
         ax.plot(curve.index, curve.to_numpy(), color=color, label=f"{label}  (${curve.iloc[-1]:.0f})")
     ax.set(title=title, ylabel="Value of $100", ylim=(min(c.min() for c, _ in curves.values()) * 0.95, top),
            xlim=(any_curve.index[0], any_curve.index[-1]))
+    ax.legend(loc="upper left")
+    fig.tight_layout()
+    fig.savefig(path)
+    plt.close(fig)
+
+
+def plot_worked_example(days, curves, in_cash, path):
+    """The guide's 15-day toy example: $100 per strategy, shaded where the GA's pick sat in cash.
+
+    curves: {label: (equity values, color)}; in_cash: boolean per day for the GA's pick.
+    """
+    fig, ax = plt.subplots(figsize=(8, 4.3))
+    for day, cash in zip(days, in_cash):
+        if cash:
+            ax.axvspan(day - 0.5, day + 0.5, color=NEUTRAL, alpha=0.18, linewidth=0)
+    ax.axvspan(0, 0, color=NEUTRAL, alpha=0.18, label="GA's pick in cash")   # legend entry only
+    for label, (equity, color) in curves.items():
+        ax.plot(days, equity, color=color, marker="o", markersize=4, label=f"{label}  (${equity[-1]:.2f})")
+    ax.set(title="Worked example: value of $100 over 15 made-up days (no costs)", xlabel="Day",
+           ylabel="Value of $100", xticks=days, xlim=(days[0] - 0.5, days[-1] + 0.5))
     ax.legend(loc="upper left")
     fig.tight_layout()
     fig.savefig(path)
